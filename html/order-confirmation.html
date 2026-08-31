@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Order Confirmed | JerseyHub</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<section class="section">
+  <div class="container">
+    <div class="confirm-box" id="confirmBox"></div>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+
+<script src="js/jersey.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+mountLayout('Shop');
+const order = JSON.parse(localStorage.getItem('jh_last_order') || 'null');
+const box = document.getElementById('confirmBox');
+
+if(!order){
+  box.innerHTML = `<h2 style="font-family:var(--font-body);text-transform:none;">No recent order found</h2>
+  <p style="color:var(--grey);margin:12px 0 24px;">Head over to the shop to place your first order.</p>
+  <a href="shop.html" class="btn btn-primary">Shop Now</a>`;
+} else {
+  box.innerHTML = `
+    <div class="check-circle">${ICONS.check}</div>
+    <h2 style="font-family:var(--font-body);text-transform:none;font-size:26px;">Order Placed Successfully!</h2>
+    <p style="color:var(--grey);margin-top:10px;">Thank you — your jerseys are being prepared for dispatch.</p>
+    <div class="order-id">${order.id}</div>
+    <p style="color:var(--grey);font-size:13.5px;">A confirmation email with tracking details has been sent to you.</p>
+    <div class="narrow mt-40" style="text-align:left;">
+      <div class="form-card">
+        ${order.items.map(i=>`<div class="summary-row" style="color:#333;"><span>${i.name} × ${i.qty}</span><span>₹${(i.price*i.qty).toLocaleString('en-IN')}</span></div>`).join('')}
+        <div class="summary-row total" style="border-top:1px solid var(--grey-line);color:#000;"><span>Total Paid</span><span>₹${order.total.toLocaleString('en-IN')}</span></div>
+      </div>
+    </div>
+    <div class="hero-cta" style="justify-content:center;margin-top:30px;">
+      <a href="track-order.html" class="btn btn-outline">Track Order</a>
+      <a href="shop.html" class="btn btn-primary">Continue Shopping</a>
+    </div>`;
+}
+</script>
+</body>
+</html>

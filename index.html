@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>JerseyHub — Wear Your Passion | Football Jerseys India</title>
+<meta name="description" content="Shop premium club and national football jerseys in India. Barcelona, Real Madrid, Manchester United, Brazil, Argentina & more. Custom jerseys, fast delivery, easy returns.">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<section class="hero">
+  <div class="hero-bg"></div>
+  <div class="container">
+    <div class="hero-content">
+      <span class="eyebrow">2025/26 Season Collection</span>
+      <h1>WEAR YOUR<br><em>PASSION</em></h1>
+      <p class="subtitle">Premium Quality Jerseys for True Fans. Choose. Wear. Support.</p>
+      <div class="hero-cta">
+        <a href="shop.html" class="btn btn-primary">Shop Now</a>
+        <a href="custom-jersey.html" class="btn btn-outline on-dark">Design Custom Jersey</a>
+      </div>
+      <div class="hero-stats">
+        <div><b>50K+</b><span>Fans Served</span></div>
+        <div><b>120+</b><span>Club &amp; Country Kits</span></div>
+        <div><b>4.7★</b><span>Average Rating</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="hero-jerseys" id="heroJerseys"></div>
+</section>
+
+<div class="marquee-strip">
+  <div class="marquee-track" id="marqueeTrack"></div>
+</div>
+
+<section class="trust-strip">
+  <div class="container trust-grid">
+    <div class="trust-item reveal">
+      <div class="icn" id="trustIcon1"></div>
+      <div><b>Premium Quality</b><span>Stadium-grade fabric &amp; stitching</span></div>
+    </div>
+    <div class="trust-item reveal">
+      <div class="icn" id="trustIcon2"></div>
+      <div><b>Fast Delivery Across India</b><span>Dispatched within 24–48 hours</span></div>
+    </div>
+    <div class="trust-item reveal">
+      <div class="icn" id="trustIcon3"></div>
+      <div><b>Easy Returns</b><span>7-day hassle-free return policy</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="section" id="players">
+  <div class="container">
+    <span class="eyebrow reveal">Shop By Category</span>
+    <h2 class="section-title reveal">Find Your Colours</h2>
+    <p class="section-sub reveal">From legendary clubs to national pride — and everything a young fan or die-hard supporter needs.</p>
+    <div class="cat-grid" id="categoryGrid"></div>
+  </div>
+</section>
+
+<section class="section tight" style="background:#f1f0eb;">
+  <div class="container">
+    <div class="section-head">
+      <div>
+        <span class="eyebrow reveal">Featured Products</span>
+        <h2 class="section-title reveal">Bestselling Jerseys</h2>
+      </div>
+      <a href="shop.html" class="btn btn-ghost reveal">View All Products</a>
+    </div>
+    <div class="prod-grid" id="featuredGrid"></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="container">
+    <span class="eyebrow reveal">Make It Yours</span>
+    <h2 class="section-title reveal">Custom Jerseys, Your Name, Your Number</h2>
+    <p class="section-sub reveal">Pick a base kit, add your name and squad number, choose your size — delivered in 5–7 days.</p>
+    <div class="info-card reveal" style="align-items:center;">
+      <div style="flex:1;">
+        <b style="font-family:var(--font-body);font-size:16px;">Start designing your custom jersey today</b>
+        <p style="color:var(--grey);font-size:13.5px;margin-top:6px;">Available across club, country and blank templates — from ₹2,499.</p>
+      </div>
+      <a href="custom-jersey.html" class="btn btn-primary">Start Customising</a>
+    </div>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+
+<script src="js/jersey.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+  mountLayout('Home');
+  document.getElementById('trustIcon1').innerHTML = ICONS.shield;
+  document.getElementById('trustIcon2').innerHTML = ICONS.truck;
+  document.getElementById('trustIcon3').innerHTML = ICONS.refresh;
+
+  // Hero jerseys
+  document.getElementById('heroJerseys').innerHTML =
+    jerseySVG({primary:'#a50044',secondary:'#004d98',trim:'#edbb00',stripes:true,number:'10',crest:'FCB',id:'h1'}) +
+    jerseySVG({primary:'#1a1a1a',secondary:'#e31c25',trim:'#ffffff',number:'7',crest:'JH',id:'h2'}) +
+    jerseySVG({primary:'#f5f5f0',secondary:'#00529f',trim:'#00529f',number:'5',crest:'RMA',id:'h3'});
+
+  // Marquee
+  const teams = ["FC BARCELONA","REAL MADRID","MANCHESTER UNITED","MANCHESTER CITY","PSG","BRAZIL","ARGENTINA","LIVERPOOL","CHELSEA","JUVENTUS"];
+  document.getElementById('marqueeTrack').innerHTML =
+    '<span>' + teams.join(' &nbsp;•&nbsp; ') + ' &nbsp;•&nbsp; </span>'.repeat(2);
+
+  // Category grid
+  const categories = [
+    {key:'club', label:'Club Jerseys', tag:'42 Kits', art:{primary:'#a50044',secondary:'#004d98',trim:'#edbb00',stripes:true,number:'10',crest:'FCB'}},
+    {key:'national', label:'National Jerseys', tag:'28 Kits', art:{primary:'#f6c60d',secondary:'#009739',trim:'#002776',number:'9',crest:'BRA'}},
+    {key:'custom', label:'Custom Jerseys', tag:'Design Now', art:{primary:'#1a1a1a',secondary:'#e31c25',trim:'#ffffff',number:'00',crest:'JH'}},
+    {key:'kids', label:'Kids Jerseys', tag:'18 Kits', art:{primary:'#DA020E',secondary:'#ffe500',trim:'#000000',number:'7',crest:'MUFC'}},
+    {key:'accessories', label:'Accessories', tag:'Socks · Balls · More', art:{primary:'#e31c25',secondary:'#1a1a1a',trim:'#ffffff',number:'',crest:'JH'}}
+  ];
+  document.getElementById('categoryGrid').innerHTML = categories.map((c,i)=>`
+    <a href="shop.html?category=${c.key}" class="cat-card reveal">
+      <span class="cat-num">0${i+1}</span>
+      ${jerseySVG({...c.art,id:'cat'+i})}
+      <div class="cat-label"><b>${c.label}</b><span>${c.tag}</span></div>
+    </a>`).join('');
+
+  // Featured products (first 8, mixing bestsellers)
+  const featuredIds = ["p01","p02","p03","p04","p05","p11","p12","p06"];
+  document.getElementById('featuredGrid').innerHTML =
+    featuredIds.map(id => productCardHTML(findProduct(id))).join('');
+
+  initReveal();
+</script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Product | JerseyHub</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<section class="page-banner">
+  <div class="container">
+    <h1 id="bannerTitle">Product</h1>
+    <div class="crumb"><a href="index.html">Home</a> / <a href="shop.html">Shop</a> / <span id="crumbName">Product</span></div>
+  </div>
+</section>
+
+<section class="section tight">
+  <div class="container">
+    <div class="pd-layout" id="pdRoot"></div>
+  </div>
+</section>
+
+<section class="section tight" style="background:#f1f0eb;">
+  <div class="container">
+    <span class="eyebrow reveal">You May Also Like</span>
+    <h2 class="section-title reveal" style="margin-bottom:26px;">Related Jerseys</h2>
+    <div class="prod-grid" id="relatedGrid"></div>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+
+<script src="js/jersey.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+mountLayout('Shop');
+const params = new URLSearchParams(window.location.search);
+const product = findProduct(params.get('id')) || PRODUCTS[0];
+document.title = product.name + ' | JerseyHub';
+document.getElementById('bannerTitle').textContent = product.name;
+document.getElementById('crumbName').textContent = product.name;
+
+const off = product.mrp > product.price ? Math.round((1-product.price/product.mrp)*100) : 0;
+const isCustomCat = product.category === 'custom';
+
+document.getElementById('pdRoot').innerHTML = `
+  <div class="pd-media reveal in">${jerseySVG({...product.art, id:'pd'})}</div>
+  <div class="reveal in">
+    <span class="pd-club">${product.club} &middot; ${product.type}</span>
+    <h2 class="pd-name">${product.name}</h2>
+    <div class="product-rating"><span class="stars">${ratingStars(product.rating)}</span> ${product.rating} out of 5 (${product.reviews} reviews)</div>
+    <div class="pd-price">
+      <span class="now">₹${product.price.toLocaleString('en-IN')}</span>
+      ${product.mrp>product.price?`<span class="was">₹${product.mrp.toLocaleString('en-IN')}</span><span class="off" style="color:var(--success);font-family:var(--font-mono);font-weight:700;">${off}% OFF</span>`:''}
+    </div>
+    <p class="pd-tax">Inclusive of all taxes. Free shipping on orders above ₹2,999.</p>
+    <p class="pd-desc">Official-style ${product.type.toLowerCase()} crafted from breathable, sweat-wicking performance fabric. Embroidered crest, true-to-size athletic fit, and reinforced stitching built to handle matchday and everyday wear alike.</p>
+
+    <div class="pd-block">
+      <h5>Select Size</h5>
+      <div class="size-grid" id="sizeGrid"></div>
+    </div>
+
+    ${isCustomCat ? `
+    <div class="custom-fields" id="customFields">
+      <h5 style="font-family:var(--font-mono);font-size:11.5px;text-transform:uppercase;letter-spacing:.06em;margin-bottom:12px;">Personalise Your Jersey</h5>
+      <div class="form-row">
+        <div class="form-field"><label>Name on Jersey</label><input type="text" id="customName" maxlength="12" placeholder="e.g. KOHLI"></div>
+        <div class="form-field"><label>Number</label><input type="number" id="customNumber" min="0" max="99" placeholder="e.g. 18"></div>
+      </div>
+      <p class="hint">Custom jerseys are made to order and ship in 5–7 business days.</p>
+    </div>` : ''}
+
+    <div class="pd-block">
+      <h5>Quantity</h5>
+      <div class="qty-row">
+        <div class="qty-control">
+          <button id="qtyMinus">−</button><span id="qtyVal">1</span><button id="qtyPlus">+</button>
+        </div>
+        <span class="hint" id="stockHint">In stock — ships in 24–48 hours</span>
+      </div>
+    </div>
+
+    <div class="pd-actions">
+      <button class="btn btn-primary" id="addToCartBtn">Add to Cart</button>
+      <button class="btn btn-outline" id="wishBtnPd">Add to Wishlist</button>
+    </div>
+
+    <div class="pd-perks">
+      <div>${ICONS.check} 100% original design, premium stitched fabric</div>
+      <div>${ICONS.check} Cash on Delivery available across India</div>
+      <div>${ICONS.check} 7-day easy returns &amp; size exchange</div>
+    </div>
+  </div>
+`;
+
+let selectedSize = product.sizes[0];
+document.getElementById('sizeGrid').innerHTML = product.sizes.map((s,i)=>`<div class="size-box ${i===0?'active':''}" data-size="${s}">${s}</div>`).join('');
+document.querySelectorAll('.size-box').forEach(box=>{
+  box.addEventListener('click', ()=>{
+    document.querySelectorAll('.size-box').forEach(b=>b.classList.remove('active'));
+    box.classList.add('active');
+    selectedSize = box.dataset.size;
+  });
+});
+
+let qty = 1;
+document.getElementById('qtyMinus').addEventListener('click', ()=>{ if(qty>1){ qty--; document.getElementById('qtyVal').textContent = qty; }});
+document.getElementById('qtyPlus').addEventListener('click', ()=>{ qty++; document.getElementById('qtyVal').textContent = qty; });
+
+document.getElementById('addToCartBtn').addEventListener('click', ()=>{
+  let custom = null;
+  if(isCustomCat){
+    const name = document.getElementById('customName').value.trim().toUpperCase();
+    const number = document.getElementById('customNumber').value.trim();
+    if(!name || !number){ showToast('Please enter a name and number to customise'); return; }
+    custom = {name, number};
+  }
+  addToCart(product, selectedSize, qty, custom);
+});
+
+document.getElementById('wishBtnPd').addEventListener('click', ()=>{
+  toggleWishlist(product.id);
+  document.getElementById('wishBtnPd').textContent = isWishlisted(product.id) ? 'Added to Wishlist ✓' : 'Add to Wishlist';
+});
+if(isWishlisted(product.id)) document.getElementById('wishBtnPd').textContent = 'Added to Wishlist ✓';
+
+// Related
+const related = PRODUCTS.filter(p => p.category === product.category && p.id !== product.id).slice(0,4);
+document.getElementById('relatedGrid').innerHTML = (related.length?related:PRODUCTS.filter(p=>p.id!==product.id).slice(0,4)).map(p=>productCardHTML(p)).join('');
+
+initReveal();
+</script>
+</body>
+</html>

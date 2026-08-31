@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Your Cart | JerseyHub</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<section class="page-banner">
+  <div class="container">
+    <h1>Your Cart</h1>
+    <div class="crumb"><a href="index.html">Home</a> / <span>Cart</span></div>
+  </div>
+</section>
+
+<section class="section tight">
+  <div class="container">
+    <div id="cartWrap"></div>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+
+<script src="js/jersey.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+mountLayout('Shop');
+
+function renderCart(){
+  const cart = getCart();
+  const wrap = document.getElementById('cartWrap');
+  if(!cart.length){
+    wrap.innerHTML = `
+      <div class="empty-state">
+        <div style="margin-bottom:14px;">${ICONS.cart}</div>
+        <h3 style="font-family:var(--font-body);text-transform:none;margin-bottom:10px;">Your cart is empty</h3>
+        <p style="margin-bottom:22px;">Looks like you haven't added any jerseys yet.</p>
+        <a href="shop.html" class="btn btn-primary">Start Shopping</a>
+      </div>`;
+    return;
+  }
+  const subtotal = cartSubtotal();
+  const shipping = subtotal >= 2999 ? 0 : 149;
+  const total = subtotal + shipping;
+
+  wrap.innerHTML = `
+    <div class="cart-layout">
+      <div>
+        <div id="cartItems"></div>
+        <a href="shop.html" class="hint" style="display:inline-block;margin-top:16px;">&larr; Continue Shopping</a>
+      </div>
+      <div class="summary-card">
+        <h3 style="color:#fff;font-size:20px;margin-bottom:18px;">Order Summary</h3>
+        <div class="summary-row"><span>Subtotal</span><span>₹${subtotal.toLocaleString('en-IN')}</span></div>
+        <div class="summary-row"><span>Shipping</span><span>${shipping===0?'FREE':'₹'+shipping}</span></div>
+        <div class="promo-row">
+          <input type="text" placeholder="Promo code">
+          <button class="btn btn-primary btn-sm" onclick="showToast('Promo code applied')">Apply</button>
+        </div>
+        <div class="summary-row total"><span>Total</span><span>₹${total.toLocaleString('en-IN')}</span></div>
+        <a href="checkout.html" class="btn btn-primary btn-full" style="margin-top:20px;">Proceed to Checkout</a>
+        <p class="hint" style="color:var(--grey);margin-top:12px;">Free shipping on orders above ₹2,999</p>
+      </div>
+    </div>`;
+
+  document.getElementById('cartItems').innerHTML = cart.map(item => `
+    <div class="cart-item">
+      <div class="thumb">${jerseySVG({...item.art, id:'ci'+item.key.replace(/[^a-z0-9]/gi,'')})}</div>
+      <div>
+        <h4>${item.name}</h4>
+        <div class="meta">Size: ${item.size || '—'} ${item.custom ? `&middot; Name: ${item.custom.name} &middot; No. ${item.custom.number}` : ''}</div>
+        <div class="qty-control">
+          <button onclick="changeQty('${item.key}',-1);renderCart();">−</button>
+          <span>${item.qty}</span>
+          <button onclick="changeQty('${item.key}',1);renderCart();">+</button>
+        </div>
+      </div>
+      <div class="price-col">
+        <div class="now">₹${(item.price*item.qty).toLocaleString('en-IN')}</div>
+        <a class="remove-link" onclick="removeFromCart('${item.key}');renderCart();">Remove</a>
+      </div>
+    </div>`).join('');
+}
+renderCart();
+</script>
+</body>
+</html>

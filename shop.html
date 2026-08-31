@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Shop All Jerseys | JerseyHub</title>
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<div id="site-header"></div>
+
+<section class="page-banner">
+  <div class="container">
+    <h1 id="bannerTitle">Shop All Jerseys</h1>
+    <div class="crumb"><a href="index.html">Home</a> / <span>Shop</span></div>
+  </div>
+</section>
+
+<section class="section tight">
+  <div class="container">
+    <div class="shop-toolbar">
+      <button class="btn btn-outline mobile-filter-btn btn-sm" id="mobileFilterBtn">Filters</button>
+      <span class="result-count" id="resultCount"></span>
+      <select id="sortSelect">
+        <option value="featured">Sort: Featured</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+        <option value="rating">Highest Rated</option>
+        <option value="new">Newest First</option>
+      </select>
+    </div>
+
+    <div class="shop-layout">
+      <aside class="filters-panel" id="filtersPanel">
+        <button class="nav-close" id="filterCloseBtn" style="display:none;position:absolute;top:16px;right:16px;color:#000;"></button>
+
+        <div class="filter-group">
+          <h5>Search</h5>
+          <input type="text" id="shopSearchInput" placeholder="Search jerseys…" style="width:100%;padding:10px 12px;border:1px solid var(--grey-line);font-size:13px;">
+        </div>
+
+        <div class="filter-group">
+          <h5>Category</h5>
+          <div id="categoryFilters"></div>
+        </div>
+
+        <div class="filter-group">
+          <h5>Club / Country</h5>
+          <div id="clubFilters" style="max-height:220px;overflow-y:auto;"></div>
+        </div>
+
+        <div class="filter-group">
+          <h5>Size</h5>
+          <div class="size-chip-row" id="sizeFilters"></div>
+        </div>
+
+        <div class="filter-group">
+          <h5>Price: ₹<span id="priceMaxLabel">5000</span></h5>
+          <input type="range" min="500" max="5000" step="100" value="5000" class="price-range" id="priceRange">
+        </div>
+
+        <button class="btn btn-outline btn-full btn-sm" id="clearFiltersBtn">Clear All Filters</button>
+      </aside>
+
+      <div>
+        <div class="prod-grid" id="shopGrid"></div>
+        <div class="empty-state" id="emptyState" style="display:none;">
+          <h3 style="font-family:var(--font-body);text-transform:none;">No jerseys match your filters</h3>
+          <p>Try adjusting or clearing your filters.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<div id="site-footer"></div>
+
+<script src="js/jersey.js"></script>
+<script src="js/data.js"></script>
+<script src="js/main.js"></script>
+<script>
+mountLayout('Shop');
+document.getElementById('filterCloseBtn').innerHTML = ICONS.close;
+
+const params = new URLSearchParams(window.location.search);
+const state = {
+  q: params.get('q') || '',
+  categories: params.get('category') ? [params.get('category')] : [],
+  clubs: [],
+  sizes: [],
+  maxPrice: 5000,
+  sort: params.get('sort') === 'new' ? 'new' : 'featured'
+};
+
+const CATEGORY_LABELS = {club:'Club Jerseys', national:'National Jerseys', custom:'Custom Jerseys', kids:'Kids Jerseys', accessories:'Accessories'};
+const allCategories = [...new Set(PRODUCTS.map(p=>p.category))];
+const allClubs = [...new Set(PRODUCTS.map(p=>p.club))].sort();
+const allSizes = [...new Set(PRODUCTS.flatMap(p=>p.sizes))];
+
+document.getElementById('categoryFilters').innerHTML = allCategories.map(c => `
+  <label class="filter-opt"><input type="checkbox" value="${c}" class="cat-check" ${state.categories.includes(c)?'checked':''}> ${CATEGORY_LABELS[c]||c}</label>
+`).join('');
+
+document.getElementById('clubFilters').innerHTML = allClubs.map(c => `
+  <label class="filter-opt"><input type="checkbox" value="${c}" class="club-check"> ${c}</label>
+`).join('');
+
+document.getElementById('sizeFilters').innerHTML = allSizes.map(s => `
+  <span class="size-chip" data-size="${s}">${s}</span>
+`).join('');
+
+if(state.q) document.getElementById('shopSearchInput').value = state.q;
+document.getElementById('sortSelect').value = state.sort === 'new' ? 'new' : 'featured';
+document.getElementById('bannerTitle').textContent = state.categories.length ? (CATEGORY_LABELS[state.categories[0]] || 'Shop') : 'Shop All Jerseys';
+
+function applyFilters(){
+  let list = PRODUCTS.slice();
+  if(state.q){
+    const q = state.q.toLowerCase();
+    list = list.filter(p => p.name.toLowerCase().includes(q) || p.club.toLowerCase().includes(q));
+  }
+  if(state.categories.length) list = list.filter(p => state.categories.includes(p.category));
+  if(state.clubs.length) list = list.filter(p => state.clubs.includes(p.club));
+  if(state.sizes.length) list = list.filter(p => p.sizes.some(s => state.sizes.includes(s)));
+  list = list.filter(p => p.price <= state.maxPrice);
+
+  if(state.sort === 'price-asc') list.sort((a,b)=>a.price-b.price);
+  else if(state.sort === 'price-desc') list.sort((a,b)=>b.price-a.price);
+  else if(state.sort === 'rating') list.sort((a,b)=>b.rating-a.rating);
+  else if(state.sort === 'new') list.sort((a,b)=>(b.badge==='NEW')-(a.badge==='NEW'));
+
+  const grid = document.getElementById('shopGrid');
+  const empty = document.getElementById('emptyState');
+  document.getElementById('resultCount').textContent = list.length + ' products found';
+  if(!list.length){ grid.innerHTML=''; empty.style.display='block'; return; }
+  empty.style.display='none';
+  grid.innerHTML = list.map(p => productCardHTML(p)).join('');
+}
+
+document.querySelectorAll('.cat-check').forEach(cb => cb.addEventListener('change', ()=>{
+  state.categories = [...document.querySelectorAll('.cat-check:checked')].map(c=>c.value);
+  document.getElementById('bannerTitle').textContent = state.categories.length===1 ? (CATEGORY_LABELS[state.categories[0]]) : 'Shop All Jerseys';
+  applyFilters();
+}));
+document.querySelectorAll('.club-check').forEach(cb => cb.addEventListener('change', ()=>{
+  state.clubs = [...document.querySelectorAll('.club-check:checked')].map(c=>c.value);
+  applyFilters();
+}));
+document.querySelectorAll('.size-chip').forEach(chip => chip.addEventListener('click', ()=>{
+  chip.classList.toggle('active');
+  state.sizes = [...document.querySelectorAll('.size-chip.active')].map(c=>c.dataset.size);
+  applyFilters();
+}));
+document.getElementById('priceRange').addEventListener('input', (e)=>{
+  state.maxPrice = Number(e.target.value);
+  document.getElementById('priceMaxLabel').textContent = state.maxPrice.toLocaleString('en-IN');
+  applyFilters();
+});
+document.getElementById('sortSelect').addEventListener('change', (e)=>{
+  state.sort = e.target.value; applyFilters();
+});
+let searchTimer;
+document.getElementById('shopSearchInput').addEventListener('input', (e)=>{
+  clearTimeout(searchTimer);
+  searchTimer = setTimeout(()=>{ state.q = e.target.value; applyFilters(); }, 200);
+});
+document.getElementById('clearFiltersBtn').addEventListener('click', ()=>{
+  window.location.href = 'shop.html';
+});
+document.getElementById('mobileFilterBtn').addEventListener('click', ()=>{
+  document.getElementById('filtersPanel').classList.add('open');
+  document.getElementById('filterCloseBtn').style.display='flex';
+});
+document.getElementById('filterCloseBtn').addEventListener('click', ()=>{
+  document.getElementById('filtersPanel').classList.remove('open');
+});
+
+applyFilters();
+</script>
+</body>
+</html>
